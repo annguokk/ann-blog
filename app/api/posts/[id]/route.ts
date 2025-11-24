@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getPostById, updatePost, deletePost } from '@/db/index'
 
-export async function GET(request: Request, ctx?: { params?: any }) {
+export async function GET(request: Request, ctx?: { params: Promise<any> }) {
   try {
     const url = new URL(request.url)
-    const maybeParams = ctx?.params
+    const maybeParams = await ctx?.params
     const paramsObj = maybeParams && typeof (maybeParams as any).then === 'function' ? await maybeParams : maybeParams
     const id = (paramsObj?.id ?? url.searchParams.get('id') ?? url.pathname.split('/').pop() ?? '').trim()
     if (!id) {
