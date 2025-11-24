@@ -20,7 +20,7 @@ export async function GET(request: Request, ctx?: { params: Promise<any> }) {
   }
 }
 
-export async function PUT(request: Request, ctx?: { params?: any }) {
+export async function PUT(request: Request, ctx?: { params: Promise<any> }) {
   const maybeParams = ctx?.params
   const paramsObj = maybeParams && typeof (maybeParams as any).then === 'function' ? await maybeParams : maybeParams
   const { id } = paramsObj as { id: string }
@@ -32,7 +32,7 @@ export async function PUT(request: Request, ctx?: { params?: any }) {
   return NextResponse.json(row)
 }
 
-export async function DELETE(_: Request, ctx?: { params?: any }) {
+export async function DELETE(_: Request, ctx?: { params: Promise<any> }) {
   const maybeParams = ctx?.params
   const paramsObj = maybeParams && typeof (maybeParams as any).then === 'function' ? await maybeParams : maybeParams
   const { id } = paramsObj as { id: string }
