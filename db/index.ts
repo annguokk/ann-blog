@@ -29,7 +29,7 @@ export async function createPost(input: NewPostInput) {
       title: input.title,
       author: input.author,
       description: input.description ?? null,
-      tags: input.tags ?? [],
+      tags: Array.isArray(input.tags) ? input.tags : [],
       category: input.category ?? null,
       img: input.img ?? null,
       github: input.github ?? null,
@@ -111,7 +111,7 @@ export async function updatePost(id: string, input: UpdatePostInput) {
   if (input.title !== undefined) updates.title = input.title
   if (input.author !== undefined) updates.author = input.author
   if (input.description !== undefined) updates.description = input.description
-  if (input.tags !== undefined) updates.tags = input.tags
+  if (input.tags !== undefined) updates.tags = Array.isArray(input.tags) ? input.tags : []
   if (input.category !== undefined) updates.category = input.category
   if (input.img !== undefined) updates.img = input.img
   if (input.github !== undefined) updates.github = input.github
