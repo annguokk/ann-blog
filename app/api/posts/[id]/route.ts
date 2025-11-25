@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { getPostById, updatePost, deletePost } from '@/db/index'
 
-export async function GET(request: Request, ctx?: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const url = new URL(request.url)
- const maybeParams = await ctx?.params
+    const maybeParams = await ctx.params
     const id = (maybeParams?.id ?? url.searchParams.get('id') ?? url.pathname.split('/').pop() ?? '').trim()
     if (!id) {
       return NextResponse.json({ error: 'id required' }, { status: 400 })
@@ -19,8 +19,8 @@ export async function GET(request: Request, ctx?: { params: Promise<{ id: string
   }
 }
 
-export async function PUT(request: Request, ctx?: { params: Promise<any> }) {
-  const maybeParams = await ctx?.params
+export async function PUT(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const maybeParams = await ctx.params
   const { id } = maybeParams as { id: string }
   const body = await request.json()
   const row = await updatePost(id, body)
@@ -30,8 +30,8 @@ export async function PUT(request: Request, ctx?: { params: Promise<any> }) {
   return NextResponse.json(row)
 }
 
-export async function DELETE(_: Request, ctx?: { params: Promise<{ id: string }> }) {
-  const maybeParams = await ctx?.params
+export async function DELETE(_: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const maybeParams = await ctx.params
   const { id } = maybeParams as { id: string }
   const ok = await deletePost(id)
   if (!ok) {
