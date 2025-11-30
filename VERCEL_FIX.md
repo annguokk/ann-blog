@@ -1,62 +1,85 @@
-# Vercel 部署修复步骤
+# Vercel 数据库设置步骤
 
 ## 问题
-在 Vercel 部署后，新增文章时报错：
-```
-Failed query: insert into "posts" ... params: ... ["123","next"] ...
-```
+Vercel 上的 PostgreSQL 数据库没有数据表。
 
-## 原因
-Vercel 的 PostgreSQL 数据库中 `posts` 表的 `tags` 列类型是 `text[]`（文本数组），但应该是 `json`。
+## 解决方案
 
-## 修复步骤
-
-### 方法 1：使用 Vercel 的 SQL Editor（推荐）
+### 步骤 1：登录 Vercel 并进入 SQL Editor
 
 1. 登录 [Vercel Dashboard](https://vercel.com)
 2. 进入你的项目
 3. 点击 **Storage** 标签
-4. 选择你的 PostgreSQL 数据库
-5. 点击 **SQL Editor** 或 **Postgres** 标签
-6. 执行以下 SQL 命令：
+4. 找到你的 PostgreSQL 数据库，点击进入
+5. 在数据库详情页面，找到 **SQL Editor** 或 **Postgres** 标签，点击打开 SQL 编辑器
+
+### 步骤 2：执行建表 SQL
+
+在 SQL Editor 中，**逐个执行**以下两个 SQL 语句：
+
+#### 第一条：创建 posts 表
 
 ```sql
-BEGIN;
-
-ALTER TABLE "posts" ADD COLUMN "tags_new" json DEFAULT '[]'::json;
-
-UPDATE "posts" 
-SET "tags_new" = CASE 
-  WHEN "tags" IS NULL THEN '[]'::json
-  WHEN "tags" = '{}'::text[] THEN '[]'::json
-  ELSE to_json("tags")
-END;
-
-ALTER TABLE "posts" DROP COLUMN "tags";
-
-ALTER TABLE "posts" RENAME COLUMN "tags_new" TO "tags";
-
-ALTER TABLE "posts" ALTER COLUMN "tags" SET NOT NULL;
-
-COMMIT;
+CREATE TABLE "posts" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" text NOT NULL,
+	"author" text NOT NULL,
+	"description" text,
+	"tags" json DEFAULT '[]'::json NOT NULL,
+	"category" text,
+	"img" text,
+	"github" text,
+	"reading_time_minutes" integer,
+	"published_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
 ```
 
-### 方法 2：使用 psql 命令行
+执行并等待完成。
+
+#### 第二条：创建 donations 表
+
+```sql
+CREATE TABLE "donations" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"post_id" uuid NOT NULL,
+	"tx_hash" text NOT NULL,
+	"donor" text,
+	"amount_wei" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+```
+
+执行并等待完成。
+
+### 步骤 3：验证表创建成功
+
+在 SQL Editor 中执行：
+```sql
+SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+```
+
+应该看到 `posts` 和 `donations` 两个表。
+
+### 步骤 4：验证部署
+
+回到 Vercel 项目，重新部署（或等待自动部署）。
+
+然后访问你的应用，测试新增文章功能。应该能成功保存数据了。
+
+## 如果使用 psql 命令行
+
+如果你有 psql 客户端，也可以直接运行：
 
 ```bash
-psql "your-database-url" -f vercel_fix_tags.sql
+# 从 drizzle 目录执行初始迁移
+psql $DATABASE_URL < drizzle/0000_mixed_sharon_carter.sql
 ```
 
-其中 `your-database-url` 是你的 Vercel PostgreSQL 连接字符串。
+其中 `$DATABASE_URL` 是你的 Vercel PostgreSQL 连接字符串（可从 Vercel Storage 详情页获取）。
 
-## 验证修复
+## 注意
 
-修复后，在 Vercel 上重新部署并测试新增文章功能。
-
-```bash
-git add .
-git commit -m "Fix tags column type for Vercel"
-git push origin main
-```
-
-然后在新增文章页面填写表单并提交，应该能成功插入数据。
+- 确保 `tags` 列的类型是 `json`，而不是 `text[]`
+- 确保两个表都创建成功
+- 创建成功后，应用就能正常读写数据了
