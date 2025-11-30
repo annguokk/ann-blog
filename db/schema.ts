@@ -1,4 +1,4 @@
-import { integer, pgTable, varchar, text, uuid, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable, varchar, text, uuid, timestamp, json } from "drizzle-orm/pg-core";
 
 
 export const postsTable = pgTable("posts", {
@@ -6,7 +6,7 @@ export const postsTable = pgTable("posts", {
   title: text("title").notNull(),
   author: text("author").notNull(),
   description: text("description"),
-  tags: text("tags").array().notNull().default([]),
+  tags: json("tags").$type<string[]>().notNull().default([]),
   category: text("category"),
   img: text("img"),
   github: text("github"),

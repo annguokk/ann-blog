@@ -24,13 +24,17 @@ export type SortOption = 'latest_published' | 'latest_updated' | 'earliest_publi
 
 export async function createPost(input: NewPostInput) {
   const now = new Date()
+  
+  // Ensure tags is always an array and properly formatted for JSON column
+  const tagsArray = Array.isArray(input.tags) ? input.tags : []
+  
   const rows = await db
     .insert(postsTable)
     .values({
       title: input.title,
       author: input.author,
       description: input.description ?? null,
-      tags: Array.isArray(input.tags) ? input.tags : [],
+      tags: tagsArray as any, // Pass as array, Drizzle will convert to JSON
       category: input.category ?? null,
       img: input.img ?? null,
       github: input.github ?? null,
