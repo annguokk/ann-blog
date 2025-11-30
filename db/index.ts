@@ -2,6 +2,7 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { DATABASE_URL } from '@/lib/serverEnv'
 import { postsTable } from '@/db/schema'
+import { donationsTable } from '@/db/schema'
 import { asc, desc, count, eq } from 'drizzle-orm'
 
 const client = postgres(DATABASE_URL, { ssl: 'require' })
@@ -142,4 +143,39 @@ export async function updatePost(id: string, input: UpdatePostInput) {
 export async function deletePost(id: string) {
   const rows = await db.delete(postsTable).where(eq(postsTable.id, id)).returning({ id: postsTable.id })
   return rows.length > 0
+}
+
+export async function createDonation(postId: string, txHash: string, donor?: string | null, amountWei?: string) {
+  const rows = await db
+    .insert(donationsTable)
+    .values({
+      post_id: postId,
+      tx_hash: txHash,
+      donor: donor ?? null,
+      amount_wei: amountWei ?? '0',
+      created_at: new Date(),
+    })
+    .returning({
+      id: donationsTable.id,
+      post_id: donationsTable.post_id,
+      tx_hash: donationsTable.tx_hash,
+      donor: donationsTable.donor,
+      amount_wei: donationsTable.amount_wei,
+      created_at: donationsTable.created_at,
+    })
+  return rows[0]
+}
+
+export async function getDonationsByPost(postId: string) {
+  return db
+    .select({
+      id: donationsTable.id,
+      tx_hash: donationsTable.tx_hash,
+      donor: donationsTable.donor,
+      amount_wei: donationsTable.amount_wei,
+      created_at: donationsTable.created_at,
+    })
+    .from(donationsTable)
+    .where(eq(donationsTable.post_id, postId))
+    .orderBy(desc(donationsTable.created_at))
 }

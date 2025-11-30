@@ -18,7 +18,9 @@
     "next": "16.0.3",
     "postgres": "^3.4.7",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "viem": "^2.40.3",
+    "wagmi": "^1.4.13"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

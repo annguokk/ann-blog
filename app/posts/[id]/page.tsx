@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
+import TipButton from '@/app/components/TipButton'
 export default function PostDetail() {
   const { id } = useParams() as { id: string }
   // 用 id 发起请求或渲染 
@@ -65,6 +66,9 @@ export default function PostDetail() {
               <h2 className="text-xl font-semibold text-white">摘要</h2>
               <p className="leading-7">{p.description}</p>
             </section>
+            <div className="mt-6">
+              <TipButton postId={id} contractAddress="0x295066613C2bd716D293Edd0dcEB577D35EF5f40" />
+            </div>
           </article>
         </div>
       </main>

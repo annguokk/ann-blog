@@ -14,3 +14,12 @@ export const postsTable = pgTable("posts", {
   published_at: timestamp("published_at", { withTimezone: true }).defaultNow().notNull(),
   updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const donationsTable = pgTable("donations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  post_id: uuid("post_id").notNull(),
+  tx_hash: text("tx_hash").notNull(),
+  donor: text("donor"),
+  amount_wei: text("amount_wei").notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});

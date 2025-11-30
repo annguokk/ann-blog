@@ -1,6 +1,7 @@
 import React from "react";
 import { type Metadata } from "next";
 import ClerkProviderWrapper from "@/app/components/ClerkProviderWrapper";
+import Web3Provider from "@/app/components/Web3Provider";
 import "./globals.css";
 import QueryClientProvider from "@/app/components/QueryClientProvider";
 import HeaderNav from "@/app/components/HeaderNav";
@@ -17,7 +18,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProviderWrapper>
-      <QueryClientProvider>
+      <Web3Provider>
+        <QueryClientProvider>
         <html lang="en">
           <body
             className={` antialiased`}
@@ -30,7 +32,8 @@ export default function RootLayout({
             </React.Suspense>
           </body>
         </html>
-      </QueryClientProvider>
+        </QueryClientProvider>
+      </Web3Provider>
     </ClerkProviderWrapper>
   );
 }
