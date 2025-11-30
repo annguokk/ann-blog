@@ -25,7 +25,7 @@ export type SortOption = 'latest_published' | 'latest_updated' | 'earliest_publi
 export async function createPost(input: NewPostInput) {
   const now = new Date()
   
-  // Ensure tags is always an array and properly formatted for JSON column
+  // Ensure tags is always an array and explicitly prepare as JSON
   const tagsArray = Array.isArray(input.tags) ? input.tags : []
   
   const rows = await db
@@ -34,7 +34,8 @@ export async function createPost(input: NewPostInput) {
       title: input.title,
       author: input.author,
       description: input.description ?? null,
-      tags: tagsArray as any, // Pass as array, Drizzle will convert to JSON
+      // Explicitly pass tags - Drizzle will handle JSON serialization
+      tags: tagsArray as any,
       category: input.category ?? null,
       img: input.img ?? null,
       github: input.github ?? null,
@@ -55,7 +56,13 @@ export async function createPost(input: NewPostInput) {
       published_at: postsTable.published_at,
       updated_at: postsTable.updated_at,
     })
-  return rows[0]
+  
+  // Ensure tags is returned as array
+  const result = rows[0]
+  if (result && typeof result.tags === 'string') {
+    result.tags = JSON.parse(result.tags)
+  }
+  return result
 }
 
 export async function getPosts(sort: SortOption = 'latest_published') {
