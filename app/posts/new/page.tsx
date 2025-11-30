@@ -29,7 +29,7 @@ export default function NewPostPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error ?? "提交失败");
+        throw new Error(data?.error ?? "提交失败了");
       }
       return res.json();
     },
